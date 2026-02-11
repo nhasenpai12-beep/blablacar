@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../model/ride_pref/ride_pref.dart';
 import '../../service/ride_prefs_service.dart';
 import '../../theme/theme.dart';
+import '../rides_screen.dart';
 
 import 'widgets/ride_pref_form.dart';
 import 'widgets/ride_pref_history_tile.dart';
@@ -23,7 +24,25 @@ class RidePrefScreen extends StatefulWidget {
 
 class _RidePrefScreenState extends State<RidePrefScreen> {
   void onRidePrefSelected(RidePref ridePref) {
-    // 1 - Navigate to the rides screen (with a buttom to top animation)
+    // 1 - Navigate to the rides screen (with a bottom to top animation)
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const RidesScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end).chain(
+            CurveTween(curve: curve),
+          );
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -70,7 +89,12 @@ class _RidePrefScreenState extends State<RidePrefScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 2.1 Display the Form to input the ride preferences
-              RidePrefForm(initRidePref: RidePrefService.currentRidePref),
+              RidePrefForm(
+                initRidePref: RidePrefService.currentRidePref,
+                onSearch: (ridePref) {
+                  onRidePrefSelected(ridePref);
+                },
+              ),
               SizedBox(height: BlaSpacings.m),
 
               // 2.2 Optionally display a list of past preferences
